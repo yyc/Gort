@@ -1,5 +1,6 @@
 var Bot = require('node-telegram-bot');
 var google=require("google");
+var getJoke=require("./jokes");
 google.resultsPerPage=10;
 
 botToken=process.argv[2];
@@ -26,6 +27,18 @@ var bot = new Bot({
         break;
         case "google":
         
+        break;
+        case "joke":
+          var joke=getJoke();
+          bot.sendMessage({
+            chat_id: message.chat.id
+            , text: joke["setup"]
+          }).then(function(){
+            bot.sendMessage({
+              chat_id: message.chat.id
+              , text: joke["punchline"]
+            });
+          });
         break;
       }
     }
