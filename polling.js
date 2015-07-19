@@ -1,3 +1,5 @@
+var util=require("util");
+var EventEmitter = require('events').EventEmitter;
 module.exports=Poll;
 
 var rd;
@@ -15,6 +17,7 @@ Poll.prototype.createQuestion=function(bot,message){
 function Question(){
   this.question={};
 }
+util.inherits(Question, EventEmitter);
 Question.prototype.init=function(bot,message){
   this.question.owner=message.from;
   bot.sendMessage({
@@ -22,7 +25,7 @@ Question.prototype.init=function(bot,message){
       ,reply_to_message_id: message.message_id
       , text: "Please state the nature of your question:\n(the next message you type will be saved as the question's full description and will be showed at the top of responses"
   });
-  bot.once(eventName(message),this.setQuestion);
+  this.once("message",this.setQuestion);
 }
 
 Question.prototype.setQuestion=function(bot,message){
@@ -33,7 +36,7 @@ Question.prototype.setQuestion=function(bot,message){
       ,reply_to_message_id: message.message_id
       , text: "Now can you give me a short, one-word label for the event? E.g. nightcycle or pratadinner"
   });
-  bot.once(eventName(message),this.setLabel);
+  this.once("message",this.setLabel);
 }
 
 Question.prototype.setLabel=function(bot,message){
@@ -47,7 +50,7 @@ Question.prototype.setLabel=function(bot,message){
         ,reply_to_message_id: message.message_id
         , text: "That contained spaces. Please try again."
     });
-    bot.once(eventName(message),this.setLabel);
+    this.once("message",this.setLabel);
   }
 }
 

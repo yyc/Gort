@@ -17,7 +17,8 @@ var stateObjects={};
 
 bot.on('message', function (message) {
   if(message.text){
-    if(bot.emit(eventName(message),bot,message)){
+    if(stateObjects[eventName(message)]){
+      stateObjects[eventName(message)].emit("message",bot,message);
       console.log("State event fired");
     }
     else{
