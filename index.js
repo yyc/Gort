@@ -28,12 +28,15 @@ bot.on('message', function (message) {
           case "help":
             bot.sendMessage({
               chat_id: message.chat.id
-                , text: "Hi, I'm Gort, your plastic pal who's fun to be with! You can summon me with the following commands:\n/help: This help message\n/respond <question_id> response: Submit your response to a question [WIP]\n/bind <verb> things for me to say"
+                , text: "Hi, I'm Gort, your plastic pal who's fun to be with! You can summon me with the following commands:\n/help: This help message\n/command </command> <response>\n/trigger <trigger> % <response>"
+                ///respond <question_id> response: Submit your response to a question [WIP]
+                //
             });
           break;
   //polling
           case "question":
             stateObjects[eventName(message)]=polld.createQuestion(bot,message);
+            autoExpire(eventName(message));
           break;
           case "whatis":
           
@@ -45,9 +48,6 @@ bot.on('message', function (message) {
           
           break;
           
-          case "google":
-          
-          break;
           case "joke":
             sendJoke(bot,message);
           break;
@@ -57,18 +57,17 @@ bot.on('message', function (message) {
           case "getgif":
             //ditto
           break;
-          case "bind":
+          case "command":
             setBind(bot,message);
+          break;
+          case "trigger":
+            setTrigger(bot,message);
           break;
           default:
             checkBinds(bot,message,command);
         }
       }
-      else if(message.text.toLowerCase().indexOf("gort")){
-        
-        
-      }
-      if (message.text.indexOf("@GortBot")!=-1){ //Direct mentions
+      else if (message.text.indexOf("@GortBot")!=-1){ //Direct mentions
         if(message.text.indexOf("hi")!=-1){
           bot.sendMessage({
             chat_id: message.chat.id
@@ -77,6 +76,9 @@ bot.on('message', function (message) {
             console.log(res);
           });
         }
+      }
+      else{
+        checkTrigger(bot,message);
       }
     }
   }
@@ -101,8 +103,8 @@ function setBind(bot,message){
   var index1=message.text.indexOf(" ");
   var index2=message.text.indexOf(" ",index1+1);
   if(index2!=-1){
-    verb=message.text.substr(index1+1,index2-index1-1).toLowerCase();
-    subject=message.text.substr(index2+1);
+    var verb=message.text.substr(index1+1,index2-index1-1).toLowerCase();
+    var subject=message.text.substr(index2+1);
     if(subject[0]=="/"){
       subject=subject.substr(1);
     }
@@ -128,8 +130,56 @@ function checkBinds(bot,message,command){
     
   });
 }
+function setTrigger(bot,message){
+  var index1=message.text.indexOf(" ");
+  var index2=message.text.indexOf("%");
+  if(index2!=-1){
+    var trigger=message.text.substr(index1+1,index2-index1-1).toLowerCase().trim();
+    var response=message.text.substr(index2+1).trim();
+    if(trigger.length&&response.length){
+      rd.set(message.chat.id+"~triggers-"+trigger,response).then(function(){
+        bot.sendMessage({
+          chat_id: message.chat.id
+          , text: "Okay! "+trigger+" now triggers "+response
+        });
+      })
+    }
+    else{
+      bot.sendMessage({
+        chat_id: message.chat.id
+          ,reply_to_message_id: message.message_id
+          , text: "That wasn't in the correct format. Remember, the correct format for the /trigger command is :\n/trigger triggering phrase % response phrase"
+      });
+    }
+  }
+  else{
+    bot.sendMessage({
+      chat_id: message.chat.id
+        ,reply_to_message_id: message.message_id
+        , text: "That wasn't in the correct format. Remember to separate your trigger and response phrases with a % sign"
+    });
+  }
+}
+function checkTrigger(bot,message){
+  rd.get(message.chat.id+"~triggers-"+message.text.toLowerCase()).then(function(response){
+    if(response){
+      bot.sendMessage({
+        chat_id: message.chat.id
+        , text: response
+      })
+    }
+  },function(){
+    
+  });
+}
+
 
 //utility functions
 function eventName(message){
   return message.chat.id+"~"+message.from.id;
+}
+function autoExpire(index){
+  stateObject[index].on("complete",function(){
+    delete stateObject[index];
+  });
 }
