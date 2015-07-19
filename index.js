@@ -16,6 +16,7 @@ var bot = new Bot({
 var stateObjects={};
 
 bot.on('message', function (message) {
+  
   if(message.text){
     if(stateObjects[eventName(message)]){
       stateObjects[eventName(message)].emit("message",bot,message);

@@ -6,7 +6,8 @@ Gort is a Telegram bot that was originally designed to provide useful functions 
 - Set up a /trigger to respond when someone says something specific
 - Set up binds for a /command
 - (Soon) Manage polls and responses
-- Adjust his humor level
+- (Soon) Manage stickying messages
+- (Soon) Adjust his humor level
 
 ##What Gort Can't Do
 - Provide real human interaction (it's in the roadmap)
